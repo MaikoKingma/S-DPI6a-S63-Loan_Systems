@@ -54,6 +54,7 @@ public class LoanClientFrame extends JFrame {
 		contentPane.add(lblBody, gbc_lblBody);
 		
 		tfSSN = new JTextField();
+		tfSSN.setText("123456");
 		GridBagConstraints gbc_tfSSN = new GridBagConstraints();
 		gbc_tfSSN.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tfSSN.insets = new Insets(0, 0, 5, 5);
@@ -71,6 +72,7 @@ public class LoanClientFrame extends JFrame {
 		contentPane.add(lblNewLabel, gbc_lblNewLabel);
 		
 		tfAmount = new JTextField();
+		tfAmount.setText("100");
 		GridBagConstraints gbc_tfAmount = new GridBagConstraints();
 		gbc_tfAmount.anchor = GridBagConstraints.NORTH;
 		gbc_tfAmount.insets = new Insets(0, 0, 5, 5);
@@ -89,6 +91,7 @@ public class LoanClientFrame extends JFrame {
 		contentPane.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		tfTime = new JTextField();
+		tfTime.setText("10");
 		GridBagConstraints gbc_tfTime = new GridBagConstraints();
 		gbc_tfTime.insets = new Insets(0, 0, 5, 5);
 		gbc_tfTime.fill = GridBagConstraints.HORIZONTAL;
