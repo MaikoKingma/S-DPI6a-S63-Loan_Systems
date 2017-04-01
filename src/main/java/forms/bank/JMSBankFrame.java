@@ -10,7 +10,7 @@ import shared.bank.*;
 import shared.request.RequestReply;
 
 
-public class MSBankFrame extends JFrame {
+public class JMSBankFrame extends JFrame {
 
 	/**
 	 * 
