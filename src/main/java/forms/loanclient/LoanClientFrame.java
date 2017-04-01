@@ -2,7 +2,10 @@ package forms.loanclient;
 import java.awt.*;
 import java.awt.Insets;
 import java.awt.event.*;
+import java.util.Properties;
 
+import javax.jms.*;
+import javax.naming.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -103,7 +106,7 @@ public class LoanClientFrame extends JFrame {
 				
 				LoanRequest request = new LoanRequest(ssn,amount,time);
 				listModel.addElement( new RequestReply<LoanRequest,LoanReply>(request, null));	
-				// to do:  send the JMS with request to Loan Broker
+				sendRequest(request);
 			}
 		});
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();
@@ -156,5 +159,42 @@ public class LoanClientFrame extends JFrame {
 				}
 			}
 		});
+	}
+
+	private void sendRequest(LoanRequest request)
+	{
+		Connection connection; // to connect to the ActiveMQ
+		Session session; // session for creating messages, producers and
+
+		Destination sendDestination; // reference to a queue destination
+		MessageProducer producer; // for sending messages
+
+		try {
+			Properties props = new Properties();
+			props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
+
+			// connect to the Destination called “loanRequestQueue”
+			// queue or topic: “queue.loanRequestQueue”
+			props.put(("queue.loanRequestQueue"), "loanRequestQueue");
+
+			Context jndiContext = new InitialContext(props);
+			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
+					.lookup("ConnectionFactory");
+			connection = connectionFactory.createConnection();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+			// connect to the sender destination
+			sendDestination = (Destination) jndiContext.lookup("loanRequestQueue");
+			producer = session.createProducer(sendDestination);
+
+			// create a object message containing the request
+			Message msg = session.createObjectMessage(request);
+			// send the message
+			producer.send(msg);
+
+		} catch (NamingException | JMSException e) {
+			e.printStackTrace();
+		}
 	}
 }
