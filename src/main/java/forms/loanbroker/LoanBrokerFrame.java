@@ -5,6 +5,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import shared.bank.*;
+import shared.loan.LoanReply;
 import shared.loan.LoanRequest;
 
 
@@ -95,5 +96,23 @@ public class LoanBrokerFrame extends JFrame {
 		}		
 	}
 
+	private void listenToRequests()
+	{
+		//ToDo
+	}
 
+	private void listenToReplys()
+	{
+		//ToDo
+	}
+
+	private void sendBankInterestRequest(BankInterestRequest request)
+	{
+		//ToDo
+	}
+
+	private void sendBankInterestReply(LoanReply reply)
+	{
+		//ToDo
+	}
 }

@@ -92,7 +92,7 @@ public class JMSBankFrame extends JFrame {
 				if (rr!= null && reply != null){
 					rr.setReply(reply);
 	                list.repaint();
-					// ToDo: sent JMS message with the reply to Loan Broker
+					sendReply(reply);
 				}
 			}
 		});
@@ -103,4 +103,13 @@ public class JMSBankFrame extends JFrame {
 		contentPane.add(btnSendReply, gbc_btnSendReply);
 	}
 
+	private void sendReply(BankInterestReply reply)
+	{
+		//ToDo
+	}
+
+	private void listenToRequests()
+	{
+		//ToDo
+	}
 }

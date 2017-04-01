@@ -200,4 +200,9 @@ public class LoanClientFrame extends JFrame {
 			e.printStackTrace();
 		}
 	}
+
+	private void listenToReplys()
+	{
+		//ToDo
+	}
 }
