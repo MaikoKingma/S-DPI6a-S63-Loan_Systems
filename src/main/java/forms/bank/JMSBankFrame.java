@@ -2,7 +2,10 @@ package forms.bank;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Properties;
 
+import javax.jms.*;
+import javax.naming.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -101,15 +104,92 @@ public class JMSBankFrame extends JFrame {
 		gbc_btnSendReply.gridx = 4;
 		gbc_btnSendReply.gridy = 1;
 		contentPane.add(btnSendReply, gbc_btnSendReply);
+
+		listenToRequests();
 	}
 
-	private void sendReply(BankInterestReply reply)
+	public void add(BankInterestRequest bankInterestRequest) {
+		listModel.addElement(new RequestReply<>(bankInterestRequest, null));
+	}
+
+	public void sendReply(BankInterestReply reply)
 	{
-		//ToDo
+		Connection connection; // to connect to the ActiveMQ
+		Session session; // session for creating messages, producers and
+
+		Destination sendDestination; // reference to a queue destination
+		MessageProducer producer; // for sending messages
+
+		try {
+			Properties props = new Properties();
+			props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
+
+			// connect to the Destination called “BankInterestReplyQueue”
+			// queue or topic: “queue.BankInterestReplyQueue”
+			props.put(("queue.BankInterestReplyQueue"), "BankInterestReplyQueue");
+
+			Context jndiContext = new InitialContext(props);
+			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
+					.lookup("ConnectionFactory");
+			connection = connectionFactory.createConnection();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+			// connect to the sender destination
+			sendDestination = (Destination) jndiContext.lookup("BankInterestReplyQueue");
+			producer = session.createProducer(sendDestination);
+
+			// create a text message containing the request
+			Message msg = session.createTextMessage(reply.getCommaSeperatedValue());
+			// send the message
+			producer.send(msg);
+
+		} catch (NamingException | JMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void listenToRequests()
 	{
-		//ToDo
+		Connection connection; // to connect to the JMS
+		Session session; // session for creating consumers
+
+		Destination receiveDestination; //reference to a queue destination
+		MessageConsumer consumer = null; // for receiving messages
+
+		try {
+			Properties props = new Properties();
+			props.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+					"org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
+
+			// connect to the Destination called “bankInterestRequestQueue”
+			// queue or topic: “queue.bankInterestRequestQueue”
+			props.put(("queue.bankInterestRequestQueue"), " bankInterestRequestQueue");
+
+			Context jndiContext = new InitialContext(props);
+			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
+					.lookup("ConnectionFactory");
+			connection = connectionFactory.createConnection();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+			// connect to the receiver destination
+			receiveDestination = (Destination) jndiContext.lookup("bankInterestRequestQueue");
+			consumer = session.createConsumer(receiveDestination);
+
+			connection.start(); // this is needed to start receiving messages
+
+		} catch (NamingException | JMSException e) {
+			e.printStackTrace();
+		}
+
+
+		try {
+			RequestListener listener = new RequestListener(this);
+			consumer.setMessageListener(listener);
+
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 }
