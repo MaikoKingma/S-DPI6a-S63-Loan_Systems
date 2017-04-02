@@ -129,7 +129,8 @@ public class LoanClientFrame extends JFrame {
 		
 		requestReplyList = new JList<RequestReply<LoanRequest,LoanReply>>(listModel);
 		scrollPane.setViewportView(requestReplyList);	
-       
+
+		listenToReplys();
 	}
 	
 	/**
@@ -149,6 +150,18 @@ public class LoanClientFrame extends JFrame {
      
      return null;
    }
+
+	//Add the new loanReply using the FiFo principle.
+	public void add(LoanReply loanReply)
+	{
+		for (int i = 0; i < listModel.getSize(); i++) {
+			RequestReply<LoanRequest,LoanReply> rr =listModel.get(i);
+			if (rr.getReply() == null) {
+				rr.setReply(loanReply);
+				break;
+			}
+		}
+	}
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -203,6 +216,45 @@ public class LoanClientFrame extends JFrame {
 
 	private void listenToReplys()
 	{
-		//ToDo
+		Connection connection; // to connect to the JMS
+		Session session; // session for creating consumers
+
+		Destination receiveDestination; //reference to a queue destination
+		MessageConsumer consumer = null; // for receiving messages
+
+		try {
+			Properties props = new Properties();
+			props.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+					"org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
+
+			// connect to the Destination called “loanReplyQueue”
+			// queue or topic: “queue.loanReplyQueue”
+			props.put(("queue.loanReplyQueue"), " loanReplyQueue");
+
+			Context jndiContext = new InitialContext(props);
+			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
+					.lookup("ConnectionFactory");
+			connection = connectionFactory.createConnection();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+			// connect to the receiver destination
+			receiveDestination = (Destination) jndiContext.lookup("loanReplyQueue");
+			consumer = session.createConsumer(receiveDestination);
+
+			connection.start(); // this is needed to start receiving messages
+
+		} catch (NamingException | JMSException e) {
+			e.printStackTrace();
+		}
+
+
+		try {
+			ReplyListener listener = new ReplyListener(this);
+			consumer.setMessageListener(listener);
+
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 }
