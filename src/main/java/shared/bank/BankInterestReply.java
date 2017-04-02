@@ -10,7 +10,7 @@ import shared.IMessage;
 public class BankInterestReply implements IMessage {
 
     private double interest; // the loan interest
-    private String bankID; // the nunique quote Id
+    private String bankID; // the unique quote Id
     
     public BankInterestReply() {
         this.interest = 0;
