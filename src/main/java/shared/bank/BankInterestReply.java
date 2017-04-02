@@ -1,23 +1,25 @@
 package shared.bank;
 
+import shared.IMessage;
+
 /**
  * This class stores information about the bank reply
  *  to a loan request of the specific client
  * 
  */
-public class BankInterestReply {
+public class BankInterestReply implements IMessage {
 
     private double interest; // the loan interest
-    private String bankId; // the nunique quote Id
+    private String bankID; // the nunique quote Id
     
     public BankInterestReply() {
         this.interest = 0;
-        this.bankId = "";
+        this.bankID = "";
     }
     
     public BankInterestReply(double interest, String quoteId) {
         this.interest = interest;
-        this.bankId = quoteId;
+        this.bankID = quoteId;
     }
 
     public double getInterest() {
@@ -29,14 +31,29 @@ public class BankInterestReply {
     }
 
     public String getQuoteId() {
-        return bankId;
+        return bankID;
     }
 
     public void setQuoteId(String quoteId) {
-        this.bankId = quoteId;
+        this.bankID = quoteId;
     }
 
     public String toString() {
-        return "quote=" + this.bankId + " interest=" + this.interest;
+        return "quote=" + this.bankID + " interest=" + this.interest;
+    }
+
+    @Override
+    public String getCommaSeperatedValue() {
+        return bankID + "," + interest;
+    }
+
+    @Override
+    public void fillFromCommaSeperatedValue(String value) {
+        String[] array = value.split(",", 2);
+        if (array.length != 2)
+            throw new IllegalArgumentException();
+
+        bankID = array[0];
+        interest = Double.parseDouble(array[1]);
     }
 }

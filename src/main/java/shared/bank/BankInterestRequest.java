@@ -1,11 +1,13 @@
 package shared.bank;
 
+import shared.IMessage;
+
 /**
  *
  * This class stores all information about an request from a bank to offer
  * a loan to a specific client.
  */
-public class BankInterestRequest {
+public class BankInterestRequest implements IMessage {
 
     private int amount; // the requested loan amount
     private int time; // the requested loan period
@@ -41,6 +43,21 @@ public class BankInterestRequest {
 
     @Override
     public String toString() {
-        return " amount=" + amount + " time=" + time;
+        return " amount=" + String.valueOf(amount) + " time=" + time;
+    }
+
+    @Override
+    public String getCommaSeperatedValue() {
+        return amount + "," + time;
+    }
+
+    @Override
+    public void fillFromCommaSeperatedValue(String value) {
+        String[] array = value.split(",");
+        if (array.length != 2)
+            throw new IllegalArgumentException();
+
+        amount = Integer.parseInt(array[0]);
+        time = Integer.parseInt(array[1]);
     }
 }

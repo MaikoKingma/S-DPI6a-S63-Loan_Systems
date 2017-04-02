@@ -1,12 +1,16 @@
 package shared.loan;
 
+import shared.IMessage;
+
+import java.text.DecimalFormat;
+
 /**
  *
  * This class stores all information about a
  * request that a client submits to get a loan.
  *
  */
-public class LoanRequest {
+public class LoanRequest implements IMessage {
 
     private int ssn; // unique client number.
     private int amount; // the ammount to borrow
@@ -53,5 +57,21 @@ public class LoanRequest {
     @Override
     public String toString() {
         return "ssn=" + String.valueOf(ssn) + " amount=" + String.valueOf(amount) + " time=" + String.valueOf(time);
+    }
+
+    @Override
+    public String getCommaSeperatedValue() {
+        return ssn + "," + amount + "," + time;
+    }
+
+    @Override
+    public void fillFromCommaSeperatedValue(String value) {
+        String[] array = value.split(",");
+        if (array.length != 3)
+            throw new IllegalArgumentException();
+
+        ssn = Integer.parseInt(array[0]);
+        amount = Integer.parseInt(array[1]);
+        time = Integer.parseInt(array[2]);
     }
 }
