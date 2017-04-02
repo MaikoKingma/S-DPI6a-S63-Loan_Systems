@@ -67,6 +67,7 @@ public class LoanBrokerFrame extends JFrame {
 		scrollPane.setViewportView(list);
 
 		listenToRequests();
+		listenToReplys();
 	}
 	
 	 private JListLine getRequestReply(LoanRequest request){    
@@ -83,6 +84,18 @@ public class LoanBrokerFrame extends JFrame {
 	
 	public void add(LoanRequest loanRequest){		
 		listModel.addElement(new JListLine(loanRequest));		
+	}
+
+	//Add the new bankReply using the FiFo principle.
+	public void add(BankInterestReply bankReply)
+	{
+		for (int i = 0; i < listModel.getSize(); i++) {
+			JListLine rr = listModel.get(i);
+			if (rr.getBankReply() == null) {
+				rr.setBankReply(bankReply);
+				break;
+			}
+		}
 	}
 	
 
@@ -148,7 +161,46 @@ public class LoanBrokerFrame extends JFrame {
 
 	private void listenToReplys()
 	{
-		//ToDo
+		Connection connection; // to connect to the JMS
+		Session session; // session for creating consumers
+
+		Destination receiveDestination; //reference to a queue destination
+		MessageConsumer consumer = null; // for receiving messages
+
+		try {
+			Properties props = new Properties();
+			props.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+					"org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
+
+			// connect to the Destination called “BankInterestReplyQueue”
+			// queue or topic: “queue.BankInterestReplyQueue”
+			props.put(("queue.BankInterestReplyQueue"), " BankInterestReplyQueue");
+
+			Context jndiContext = new InitialContext(props);
+			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
+					.lookup("ConnectionFactory");
+			connection = connectionFactory.createConnection();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+			// connect to the receiver destination
+			receiveDestination = (Destination) jndiContext.lookup("BankInterestReplyQueue");
+			consumer = session.createConsumer(receiveDestination);
+
+			connection.start(); // this is needed to start receiving messages
+
+		} catch (NamingException | JMSException e) {
+			e.printStackTrace();
+		}
+
+
+		try {
+			ReplyListener listener = new ReplyListener(this);
+			consumer.setMessageListener(listener);
+
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendBankInterestRequest(BankInterestRequest request)
@@ -190,6 +242,38 @@ public class LoanBrokerFrame extends JFrame {
 
 	public void sendLoanReply(LoanReply reply)
 	{
-		//ToDo
+		Connection connection; // to connect to the ActiveMQ
+		Session session; // session for creating messages, producers and
+
+		Destination sendDestination; // reference to a queue destination
+		MessageProducer producer; // for sending messages
+
+		try {
+			Properties props = new Properties();
+			props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
+
+			// connect to the Destination called “loanReplyQueue”
+			// queue or topic: “queue.loanReplyQueue”
+			props.put(("queue.loanReplyQueue"), "loanReplyQueue");
+
+			Context jndiContext = new InitialContext(props);
+			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
+					.lookup("ConnectionFactory");
+			connection = connectionFactory.createConnection();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+			// connect to the sender destination
+			sendDestination = (Destination) jndiContext.lookup("loanReplyQueue");
+			producer = session.createProducer(sendDestination);
+
+			// create a text message containing the request
+			Message msg = session.createTextMessage(reply.getCommaSeperatedValue());
+			// send the message
+			producer.send(msg);
+
+		} catch (NamingException | JMSException e) {
+			e.printStackTrace();
+		}
 	}
 }
