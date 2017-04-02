@@ -188,7 +188,7 @@ public class LoanBrokerFrame extends JFrame {
 		}
 	}
 
-	public void loanReplyReply(LoanReply reply)
+	public void sendLoanReply(LoanReply reply)
 	{
 		//ToDo
 	}
