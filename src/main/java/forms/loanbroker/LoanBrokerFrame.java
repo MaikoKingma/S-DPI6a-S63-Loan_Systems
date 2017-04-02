@@ -144,7 +144,6 @@ public class LoanBrokerFrame extends JFrame {
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private void listenToReplys()
@@ -189,7 +188,7 @@ public class LoanBrokerFrame extends JFrame {
 		}
 	}
 
-	public void sendBankInterestReply(LoanReply reply)
+	public void loanReplyReply(LoanReply reply)
 	{
 		//ToDo
 	}
