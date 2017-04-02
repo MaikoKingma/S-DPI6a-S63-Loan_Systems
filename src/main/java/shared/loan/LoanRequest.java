@@ -2,8 +2,6 @@ package shared.loan;
 
 import shared.IMessage;
 
-import java.text.DecimalFormat;
-
 /**
  *
  * This class stores all information about a
