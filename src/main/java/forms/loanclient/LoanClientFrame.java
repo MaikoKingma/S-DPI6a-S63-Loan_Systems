@@ -191,8 +191,8 @@ public class LoanClientFrame extends JFrame {
 			sendDestination = (Destination) jndiContext.lookup("loanRequestQueue");
 			producer = session.createProducer(sendDestination);
 
-			// create a object message containing the request
-			Message msg = session.createObjectMessage(request);
+			// create a text message containing the request
+			Message msg = session.createTextMessage(request.getCommaSeperatedValue());
 			// send the message
 			producer.send(msg);
 
