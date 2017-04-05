@@ -77,6 +77,7 @@ public class JMSBankFrame extends JFrame {
 		contentPane.add(lblNewLabel, gbc_lblNewLabel);
 		
 		tfReply = new JTextField();
+		tfReply.setText("1");
 		GridBagConstraints gbc_tfReply = new GridBagConstraints();
 		gbc_tfReply.gridwidth = 2;
 		gbc_tfReply.insets = new Insets(0, 0, 0, 5);
