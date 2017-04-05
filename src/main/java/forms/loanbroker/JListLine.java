@@ -19,6 +19,7 @@ class JListLine {
 	private LoanRequest loanRequest;
 	private BankInterestRequest bankRequest;
 	private BankInterestReply bankReply;
+	private String CorrolationId;
 
 	public JListLine(LoanRequest loanRequest) {
 		this.setLoanRequest(loanRequest);
@@ -46,6 +47,14 @@ class JListLine {
 
 	public void setBankReply(BankInterestReply bankReply) {
 		this.bankReply = bankReply;
+	}
+
+	public String getCorrolationId() {
+		return CorrolationId;
+	}
+
+	public void setCorrolationId(String corrolationId) {
+		CorrolationId = corrolationId;
 	}
 
 	@Override

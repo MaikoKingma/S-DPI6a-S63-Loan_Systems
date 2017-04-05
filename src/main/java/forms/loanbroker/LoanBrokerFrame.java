@@ -70,34 +70,32 @@ public class LoanBrokerFrame extends JFrame {
 		listenToReplys();
 	}
 	
-	 private JListLine getRequestReply(LoanRequest request){    
-	     
-	     for (int i = 0; i < listModel.getSize(); i++){
-	    	 JListLine rr =listModel.get(i);
-	    	 if (rr.getLoanRequest() == request){
-	    		 return rr;
-	    	 }
-	     }
-	     
-	     return null;
-	   }
+	private JListLine getRequestReply(LoanRequest request){
+		for (int i = 0; i < listModel.getSize(); i++){
+			JListLine rr =listModel.get(i);
+			if (rr.getLoanRequest() == request){
+				return rr;
+			}
+		}
+
+		return null;
+	}
+
+	private JListLine getRequestReply(String CorrolationId)
+	{
+		for (int i = 0; i < listModel.getSize(); i++){
+			JListLine rr =listModel.get(i);
+			if (rr.getCorrolationId() == CorrolationId){
+				return rr;
+			}
+		}
+
+		return null;
+	}
 	
 	public void add(LoanRequest loanRequest){		
 		listModel.addElement(new JListLine(loanRequest));		
 	}
-
-	//Add the new bankReply using the FiFo principle.
-	public void add(BankInterestReply bankReply)
-	{
-		for (int i = 0; i < listModel.getSize(); i++) {
-			JListLine rr = listModel.get(i);
-			if (rr.getBankReply() == null) {
-				rr.setBankReply(bankReply);
-				break;
-			}
-		}
-	}
-	
 
 	public void add(LoanRequest loanRequest,BankInterestRequest bankRequest){
 		JListLine rr = getRequestReply(loanRequest);
@@ -107,8 +105,8 @@ public class LoanBrokerFrame extends JFrame {
 		}		
 	}
 	
-	public void add(LoanRequest loanRequest, BankInterestReply bankReply){
-		JListLine rr = getRequestReply(loanRequest);
+	public void add(String CorrolationId, BankInterestReply bankReply){
+		JListLine rr = getRequestReply(CorrolationId);
 		if (rr!= null && bankReply != null){
 			rr.setBankReply(bankReply);;
             list.repaint();
@@ -200,8 +198,13 @@ public class LoanBrokerFrame extends JFrame {
 
 
 		try {
-			ReplyListener listener = new ReplyListener(this);
-			consumer.setMessageListener(listener);
+			consumer.setMessageListener(new MessageListener() {
+
+				@Override
+				public void onMessage(Message msg) {
+					processReplyMessage(msg);
+				}
+			});
 
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -296,6 +299,24 @@ public class LoanBrokerFrame extends JFrame {
 		}
 		catch (JMSException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void processReplyMessage(Message msg) {
+		if (msg instanceof TextMessage)
+		{
+			try {
+				String value = ((TextMessage) msg).getText();
+				BankInterestReply bankInterestReply = new BankInterestReply();
+				bankInterestReply.fillFromCommaSeperatedValue(value);
+				add(msg.getJMSCorrelationID(), bankInterestReply);
+
+				LoanReply reply = new LoanReply(bankInterestReply.getInterest(), bankInterestReply.getQuoteId());
+				sendLoanReply(reply);
+			}
+			catch (JMSException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
