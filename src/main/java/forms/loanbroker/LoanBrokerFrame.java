@@ -173,9 +173,9 @@ public class LoanBrokerFrame extends JFrame {
 					"org.apache.activemq.jndi.ActiveMQInitialContextFactory");
 			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
 
-			// connect to the Destination called “BankInterestReplyQueue”
-			// queue or topic: “queue.BankInterestReplyQueue”
-			props.put(("queue.BankInterestReplyQueue"), " BankInterestReplyQueue");
+			// connect to the Destination called “bankInterestReplyQueue”
+			// queue or topic: “queue.bankInterestReplyQueue”
+			props.put(("queue.bankInterestReplyQueue"), "bankInterestReplyQueue");
 
 			Context jndiContext = new InitialContext(props);
 			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
@@ -184,7 +184,7 @@ public class LoanBrokerFrame extends JFrame {
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 			// connect to the receiver destination
-			receiveDestination = (Destination) jndiContext.lookup("BankInterestReplyQueue");
+			receiveDestination = (Destination) jndiContext.lookup("bankInterestReplyQueue");
 			consumer = session.createConsumer(receiveDestination);
 
 			connection.start(); // this is needed to start receiving messages
