@@ -125,9 +125,9 @@ public class JMSBankFrame extends JFrame {
 			props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
 			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
 
-			// connect to the Destination called “BankInterestReplyQueue”
-			// queue or topic: “queue.BankInterestReplyQueue”
-			props.put(("queue.BankInterestReplyQueue"), "BankInterestReplyQueue");
+			// connect to the Destination called “bankInterestReplyQueue”
+			// queue or topic: “queue.bankInterestReplyQueue”
+			props.put(("queue.bankInterestReplyQueue"), "bankInterestReplyQueue");
 
 			Context jndiContext = new InitialContext(props);
 			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
@@ -136,7 +136,7 @@ public class JMSBankFrame extends JFrame {
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 			// connect to the sender destination
-			sendDestination = (Destination) jndiContext.lookup("BankInterestReplyQueue");
+			sendDestination = (Destination) jndiContext.lookup("bankInterestReplyQueue");
 			producer = session.createProducer(sendDestination);
 
 			// create a text message containing the request
