@@ -151,8 +151,13 @@ public class LoanBrokerFrame extends JFrame {
 
 
 		try {
-			RequestListener listener = new RequestListener(this);
-			consumer.setMessageListener(listener);
+			consumer.setMessageListener(new MessageListener() {
+
+											@Override
+											public void onMessage(Message msg) {
+												processRequestMessage(msg);
+											}
+										});
 
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -203,7 +208,7 @@ public class LoanBrokerFrame extends JFrame {
 		}
 	}
 
-	public void sendBankInterestRequest(BankInterestRequest request)
+	public void sendBankInterestRequest(BankInterestRequest request, String CorrelationId)
 	{
 		Connection connection; // to connect to the ActiveMQ
 		Session session; // session for creating messages, producers and
@@ -232,6 +237,7 @@ public class LoanBrokerFrame extends JFrame {
 
 			// create a text message containing the request
 			Message msg = session.createTextMessage(request.getCommaSeperatedValue());
+			msg.setJMSCorrelationID(CorrelationId);
 			// send the message
 			producer.send(msg);
 
@@ -273,6 +279,22 @@ public class LoanBrokerFrame extends JFrame {
 			producer.send(msg);
 
 		} catch (NamingException | JMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void processRequestMessage(Message msg)
+	{
+		try {
+			String value = ((TextMessage) msg).getText();
+			LoanRequest loanRequest = new LoanRequest();
+			loanRequest.fillFromCommaSeperatedValue(value);
+			add(loanRequest);
+			BankInterestRequest request = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
+			sendBankInterestRequest(request, msg.getJMSCorrelationID());
+			add(loanRequest, request);
+		}
+		catch (JMSException e) {
 			e.printStackTrace();
 		}
 	}
