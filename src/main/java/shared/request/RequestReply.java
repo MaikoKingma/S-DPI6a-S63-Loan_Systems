@@ -14,6 +14,8 @@ public class RequestReply<REQUEST,REPLY> {
 	
 	private REQUEST request;
 	private REPLY reply;
+
+	private String CorrelationId;
 	
 	public RequestReply(REQUEST request,  REPLY reply) {
 		setRequest(request);
@@ -35,10 +37,17 @@ public class RequestReply<REQUEST,REPLY> {
 	public void setReply(REPLY reply) {
 		this.reply = reply;
 	}
+
+	public String getCorrelationId() {
+		return CorrelationId;
+	}
+
+	public void setCorrelationId(String correlationId) {
+		CorrelationId = correlationId;
+	}
 	
 	@Override
 	public String toString() {
 	   return request.toString() + "  --->  " + ((reply!=null)?reply.toString():"waiting for reply...");
 	}
-	
 }

@@ -96,7 +96,7 @@ public class JMSBankFrame extends JFrame {
 				if (rr!= null && reply != null){
 					rr.setReply(reply);
 	                list.repaint();
-					sendReply(reply);
+					sendReply(reply, rr.getCorrelationId());
 				}
 			}
 		});
@@ -109,11 +109,13 @@ public class JMSBankFrame extends JFrame {
 		listenToRequests();
 	}
 
-	public void add(BankInterestRequest bankInterestRequest) {
-		listModel.addElement(new RequestReply<>(bankInterestRequest, null));
+	public void add(BankInterestRequest bankInterestRequest, String CorrolationId) {
+		RequestReply rr = new RequestReply<>(bankInterestRequest, null);
+		rr.setCorrelationId(CorrolationId);
+		listModel.addElement(rr);
 	}
 
-	public void sendReply(BankInterestReply reply)
+	public void sendReply(BankInterestReply reply, String CorrelationId)
 	{
 		Connection connection; // to connect to the ActiveMQ
 		Session session; // session for creating messages, producers and
@@ -142,6 +144,7 @@ public class JMSBankFrame extends JFrame {
 
 			// create a text message containing the request
 			Message msg = session.createTextMessage(reply.getCommaSeperatedValue());
+			msg.setJMSCorrelationID(CorrelationId);
 			// send the message
 			producer.send(msg);
 
@@ -186,11 +189,31 @@ public class JMSBankFrame extends JFrame {
 
 
 		try {
-			RequestListener listener = new RequestListener(this);
-			consumer.setMessageListener(listener);
+			consumer.setMessageListener(new MessageListener() {
+
+				@Override
+				public void onMessage(Message msg) {
+					processRequestMessage(msg);
+				}
+			});
 
 		} catch (JMSException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void processRequestMessage(Message msg) {
+		if (msg instanceof TextMessage)
+		{
+			try {
+				String value = ((TextMessage) msg).getText();
+				BankInterestRequest bankInterestRequest = new BankInterestRequest();
+				bankInterestRequest.fillFromCommaSeperatedValue(value);
+				add(bankInterestRequest, msg.getJMSCorrelationID());
+			}
+			catch (JMSException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
