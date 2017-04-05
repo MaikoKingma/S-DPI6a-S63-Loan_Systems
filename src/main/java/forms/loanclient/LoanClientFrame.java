@@ -206,6 +206,7 @@ public class LoanClientFrame extends JFrame {
 
 			// create a text message containing the request
 			Message msg = session.createTextMessage(request.getCommaSeperatedValue());
+			msg.setJMSCorrelationID(getCorrolationId());
 			// send the message
 			producer.send(msg);
 
@@ -256,5 +257,13 @@ public class LoanClientFrame extends JFrame {
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String name = "clientName";
+	private int Id = 0;
+	private String getCorrolationId()
+	{
+		Id++;
+		return name + Integer.toString(Id);
 	}
 }
