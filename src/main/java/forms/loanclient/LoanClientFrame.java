@@ -108,8 +108,10 @@ public class LoanClientFrame extends JFrame {
 				int time = Integer.parseInt(tfTime.getText());				
 				
 				LoanRequest request = new LoanRequest(ssn,amount,time);
-				listModel.addElement( new RequestReply<LoanRequest,LoanReply>(request, null));	
-				sendRequest(request);
+				RequestReply rr = new RequestReply<LoanRequest,LoanReply>(request, null);
+				rr.setCorrelationId(getCorrolationId());
+				listModel.addElement(rr);
+				sendRequest(request, rr.getCorrelationId());
 			}
 		});
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();
@@ -143,7 +145,7 @@ public class LoanClientFrame extends JFrame {
      
      for (int i = 0; i < listModel.getSize(); i++){
     	 RequestReply<LoanRequest,LoanReply> rr = listModel.get(i);
-    	 if (rr.getCorrelationId() == CorrolationId){
+    	 if (rr.getCorrelationId().equals(CorrolationId)) {
     		 return rr;
     	 }
      }
@@ -165,7 +167,7 @@ public class LoanClientFrame extends JFrame {
 		});
 	}
 
-	private void sendRequest(LoanRequest request)
+	private void sendRequest(LoanRequest request, String corrolationId)
 	{
 		Connection connection; // to connect to the ActiveMQ
 		Session session; // session for creating messages, producers and
@@ -194,7 +196,7 @@ public class LoanClientFrame extends JFrame {
 
 			// create a text message containing the request
 			Message msg = session.createTextMessage(request.getCommaSeperatedValue());
-			msg.setJMSCorrelationID(getCorrolationId());
+			msg.setJMSCorrelationID(corrolationId);
 			// send the message
 			producer.send(msg);
 			System.out.println("<<< CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + ((TextMessage)msg).getText());

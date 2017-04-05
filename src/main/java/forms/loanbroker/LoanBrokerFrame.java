@@ -85,7 +85,7 @@ public class LoanBrokerFrame extends JFrame {
 	{
 		for (int i = 0; i < listModel.getSize(); i++){
 			JListLine rr =listModel.get(i);
-			if (rr.getCorrolationId() == CorrolationId){
+			if (rr.getCorrolationId().equals(CorrolationId)){
 				return rr;
 			}
 		}
