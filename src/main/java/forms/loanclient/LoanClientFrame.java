@@ -136,32 +136,20 @@ public class LoanClientFrame extends JFrame {
 	/**
 	 * This method returns the RequestReply line that belongs to the request from requestReplyList (JList). 
 	 * You can call this method when an reply arrives in order to add this reply to the right request in requestReplyList.
-	 * @param request
+	 * @param CorrolationId
 	 * @return
 	 */
-   private RequestReply<LoanRequest,LoanReply> getRequestReply(LoanRequest request){    
+   private RequestReply<LoanRequest,LoanReply> getRequestReply(String CorrolationId){
      
      for (int i = 0; i < listModel.getSize(); i++){
-    	 RequestReply<LoanRequest,LoanReply> rr =listModel.get(i);
-    	 if (rr.getRequest() == request){
+    	 RequestReply<LoanRequest,LoanReply> rr = listModel.get(i);
+    	 if (rr.getCorrelationId() == CorrolationId){
     		 return rr;
     	 }
      }
      
      return null;
    }
-
-	//Add the new loanReply using the FiFo principle.
-	public void add(LoanReply loanReply)
-	{
-		for (int i = 0; i < listModel.getSize(); i++) {
-			RequestReply<LoanRequest,LoanReply> rr =listModel.get(i);
-			if (rr.getReply() == null) {
-				rr.setReply(loanReply);
-				break;
-			}
-		}
-	}
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -251,11 +239,31 @@ public class LoanClientFrame extends JFrame {
 
 
 		try {
-			ReplyListener listener = new ReplyListener(this);
-			consumer.setMessageListener(listener);
+			consumer.setMessageListener(new MessageListener() {
+
+				@Override
+				public void onMessage(Message msg) {
+					processReplyMessage(msg);
+				}
+			});
 
 		} catch (JMSException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void processReplyMessage(Message msg) {
+		if (msg instanceof TextMessage)
+		{
+			try {
+				String value = ((TextMessage) msg).getText();
+				LoanReply loanReply = new LoanReply();
+				loanReply.fillFromCommaSeperatedValue(value);
+				getRequestReply(msg.getJMSCorrelationID()).setReply(loanReply);
+			}
+			catch (JMSException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

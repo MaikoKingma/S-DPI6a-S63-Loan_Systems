@@ -93,8 +93,10 @@ public class LoanBrokerFrame extends JFrame {
 		return null;
 	}
 	
-	public void add(LoanRequest loanRequest){		
-		listModel.addElement(new JListLine(loanRequest));		
+	public void add(LoanRequest loanRequest, String CorrolationId){
+		JListLine rr = new JListLine(loanRequest);
+		rr.setCorrolationId(CorrolationId);
+		listModel.addElement(rr);
 	}
 
 	public void add(LoanRequest loanRequest,BankInterestRequest bankRequest){
@@ -249,7 +251,7 @@ public class LoanBrokerFrame extends JFrame {
 		}
 	}
 
-	public void sendLoanReply(LoanReply reply)
+	public void sendLoanReply(LoanReply reply, String CorrolationId)
 	{
 		Connection connection; // to connect to the ActiveMQ
 		Session session; // session for creating messages, producers and
@@ -278,6 +280,7 @@ public class LoanBrokerFrame extends JFrame {
 
 			// create a text message containing the request
 			Message msg = session.createTextMessage(reply.getCommaSeperatedValue());
+			msg.setJMSCorrelationID(CorrolationId);
 			// send the message
 			producer.send(msg);
 
@@ -292,7 +295,7 @@ public class LoanBrokerFrame extends JFrame {
 			String value = ((TextMessage) msg).getText();
 			LoanRequest loanRequest = new LoanRequest();
 			loanRequest.fillFromCommaSeperatedValue(value);
-			add(loanRequest);
+			add(loanRequest, msg.getJMSCorrelationID());
 			BankInterestRequest request = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
 			sendBankInterestRequest(request, msg.getJMSCorrelationID());
 			add(loanRequest, request);
@@ -312,7 +315,7 @@ public class LoanBrokerFrame extends JFrame {
 				add(msg.getJMSCorrelationID(), bankInterestReply);
 
 				LoanReply reply = new LoanReply(bankInterestReply.getInterest(), bankInterestReply.getQuoteId());
-				sendLoanReply(reply);
+				sendLoanReply(reply, msg.getJMSCorrelationID());
 			}
 			catch (JMSException e) {
 				e.printStackTrace();
