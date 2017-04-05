@@ -147,6 +147,7 @@ public class JMSBankFrame extends JFrame {
 			msg.setJMSCorrelationID(CorrelationId);
 			// send the message
 			producer.send(msg);
+			System.out.print("<<< CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + ((TextMessage)msg).getText());
 
 		} catch (NamingException | JMSException e) {
 			e.printStackTrace();
@@ -207,6 +208,7 @@ public class JMSBankFrame extends JFrame {
 		{
 			try {
 				String value = ((TextMessage) msg).getText();
+				System.out.print(">>> CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + value);
 				BankInterestRequest bankInterestRequest = new BankInterestRequest();
 				bankInterestRequest.fillFromCommaSeperatedValue(value);
 				add(bankInterestRequest, msg.getJMSCorrelationID());

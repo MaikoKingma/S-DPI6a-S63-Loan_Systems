@@ -197,6 +197,7 @@ public class LoanClientFrame extends JFrame {
 			msg.setJMSCorrelationID(getCorrolationId());
 			// send the message
 			producer.send(msg);
+			System.out.print("<<< CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + ((TextMessage)msg).getText());
 
 		} catch (NamingException | JMSException e) {
 			e.printStackTrace();
@@ -257,9 +258,12 @@ public class LoanClientFrame extends JFrame {
 		{
 			try {
 				String value = ((TextMessage) msg).getText();
+				System.out.print(">>> CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + value);
 				LoanReply loanReply = new LoanReply();
 				loanReply.fillFromCommaSeperatedValue(value);
-				getRequestReply(msg.getJMSCorrelationID()).setReply(loanReply);
+				RequestReply rr = getRequestReply(msg.getJMSCorrelationID());
+				if (rr != null)
+					rr.setReply(loanReply);
 			}
 			catch (JMSException e) {
 				e.printStackTrace();

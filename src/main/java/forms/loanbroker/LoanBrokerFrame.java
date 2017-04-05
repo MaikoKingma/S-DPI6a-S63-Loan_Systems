@@ -110,7 +110,7 @@ public class LoanBrokerFrame extends JFrame {
 	public void add(String CorrolationId, BankInterestReply bankReply){
 		JListLine rr = getRequestReply(CorrolationId);
 		if (rr!= null && bankReply != null){
-			rr.setBankReply(bankReply);;
+			rr.setBankReply(bankReply);
             list.repaint();
 		}		
 	}
@@ -245,6 +245,7 @@ public class LoanBrokerFrame extends JFrame {
 			msg.setJMSCorrelationID(CorrelationId);
 			// send the message
 			producer.send(msg);
+			System.out.print("<<< CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + ((TextMessage)msg).getText());
 
 		} catch (NamingException | JMSException e) {
 			e.printStackTrace();
@@ -283,6 +284,7 @@ public class LoanBrokerFrame extends JFrame {
 			msg.setJMSCorrelationID(CorrolationId);
 			// send the message
 			producer.send(msg);
+			System.out.print("<<< CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + ((TextMessage)msg).getText());
 
 		} catch (NamingException | JMSException e) {
 			e.printStackTrace();
@@ -293,6 +295,7 @@ public class LoanBrokerFrame extends JFrame {
 	{
 		try {
 			String value = ((TextMessage) msg).getText();
+			System.out.print(">>> CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + value);
 			LoanRequest loanRequest = new LoanRequest();
 			loanRequest.fillFromCommaSeperatedValue(value);
 			add(loanRequest, msg.getJMSCorrelationID());
@@ -310,6 +313,7 @@ public class LoanBrokerFrame extends JFrame {
 		{
 			try {
 				String value = ((TextMessage) msg).getText();
+				System.out.print(">>> CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + value);
 				BankInterestReply bankInterestReply = new BankInterestReply();
 				bankInterestReply.fillFromCommaSeperatedValue(value);
 				add(msg.getJMSCorrelationID(), bankInterestReply);
