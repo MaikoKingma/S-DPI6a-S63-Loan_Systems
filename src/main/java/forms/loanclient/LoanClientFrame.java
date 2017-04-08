@@ -2,10 +2,7 @@ package forms.loanclient;
 import java.awt.*;
 import java.awt.Insets;
 import java.awt.event.*;
-import java.util.Properties;
 
-import javax.jms.*;
-import javax.naming.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -14,9 +11,8 @@ import shared.request.RequestReply;
 
 public class LoanClientFrame extends JFrame {
 
-	/**
-	 * 
-	 */
+	private static LoanBrokerAppGateway gateway;
+
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField tfSSN;
@@ -109,9 +105,8 @@ public class LoanClientFrame extends JFrame {
 				
 				LoanRequest request = new LoanRequest(ssn,amount,time);
 				RequestReply rr = new RequestReply<LoanRequest,LoanReply>(request, null);
-				rr.setCorrelationId(getCorrolationId());
 				listModel.addElement(rr);
-				sendRequest(request, rr.getCorrelationId());
+				gateway.applyForLoan(request);
 			}
 		});
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();
@@ -130,154 +125,37 @@ public class LoanClientFrame extends JFrame {
 		contentPane.add(scrollPane, gbc_scrollPane);
 		
 		requestReplyList = new JList<RequestReply<LoanRequest,LoanReply>>(listModel);
-		scrollPane.setViewportView(requestReplyList);	
-
-		listenToReplys();
+		scrollPane.setViewportView(requestReplyList);
 	}
-	
+
 	/**
 	 * This method returns the RequestReply line that belongs to the request from requestReplyList (JList). 
 	 * You can call this method when an reply arrives in order to add this reply to the right request in requestReplyList.
-	 * @param CorrolationId
+	 * @param request
 	 * @return
 	 */
-   private RequestReply<LoanRequest,LoanReply> getRequestReply(String CorrolationId){
-     
-     for (int i = 0; i < listModel.getSize(); i++){
-    	 RequestReply<LoanRequest,LoanReply> rr = listModel.get(i);
-    	 if (rr.getCorrelationId().equals(CorrolationId)) {
-    		 return rr;
-    	 }
-     }
-     
-     return null;
-   }
+	public void addReply(LoanRequest request, LoanReply reply){
+
+		for (int i = 0; i < listModel.getSize(); i++){
+			RequestReply<LoanRequest,LoanReply> rr = listModel.get(i);
+			if (rr.getRequest() == request){
+				rr.setReply(reply);
+				break;
+			}
+		}
+	}
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					LoanClientFrame frame = new LoanClientFrame();
-					
+					gateway = new LoanBrokerAppGateway(frame);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-	}
-
-	private void sendRequest(LoanRequest request, String corrolationId)
-	{
-		Connection connection; // to connect to the ActiveMQ
-		Session session; // session for creating messages, producers and
-
-		Destination sendDestination; // reference to a queue destination
-		MessageProducer producer; // for sending messages
-
-		try {
-			Properties props = new Properties();
-			props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
-
-			// connect to the Destination called “loanRequestQueue”
-			// queue or topic: “queue.loanRequestQueue”
-			props.put(("queue.loanRequestQueue"), "loanRequestQueue");
-
-			Context jndiContext = new InitialContext(props);
-			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
-					.lookup("ConnectionFactory");
-			connection = connectionFactory.createConnection();
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-			// connect to the sender destination
-			sendDestination = (Destination) jndiContext.lookup("loanRequestQueue");
-			producer = session.createProducer(sendDestination);
-
-			// create a text message containing the request
-			Message msg = session.createTextMessage(request.getCommaSeperatedValue());
-			msg.setJMSCorrelationID(corrolationId);
-			// send the message
-			producer.send(msg);
-			System.out.println("<<< CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + ((TextMessage)msg).getText());
-
-		} catch (NamingException | JMSException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void listenToReplys()
-	{
-		Connection connection; // to connect to the JMS
-		Session session; // session for creating consumers
-
-		Destination receiveDestination; //reference to a queue destination
-		MessageConsumer consumer = null; // for receiving messages
-
-		try {
-			Properties props = new Properties();
-			props.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-					"org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-			props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
-
-			// connect to the Destination called “loanReplyQueue”
-			// queue or topic: “queue.loanReplyQueue”
-			props.put(("queue.loanReplyQueue"), " loanReplyQueue");
-
-			Context jndiContext = new InitialContext(props);
-			ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext
-					.lookup("ConnectionFactory");
-			connection = connectionFactory.createConnection();
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-			// connect to the receiver destination
-			receiveDestination = (Destination) jndiContext.lookup("loanReplyQueue");
-			consumer = session.createConsumer(receiveDestination);
-
-			connection.start(); // this is needed to start receiving messages
-
-		} catch (NamingException | JMSException e) {
-			e.printStackTrace();
-		}
-
-
-		try {
-			consumer.setMessageListener(new MessageListener() {
-
-				@Override
-				public void onMessage(Message msg) {
-					processReplyMessage(msg);
-				}
-			});
-
-		} catch (JMSException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void processReplyMessage(Message msg) {
-		if (msg instanceof TextMessage)
-		{
-			try {
-				String value = ((TextMessage) msg).getText();
-				System.out.println(">>> CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + value);
-				LoanReply loanReply = new LoanReply();
-				loanReply.fillFromCommaSeperatedValue(value);
-				RequestReply rr = getRequestReply(msg.getJMSCorrelationID());
-				if (rr != null)
-					rr.setReply(loanReply);
-			}
-			catch (JMSException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private String name = "clientName";
-	private int Id = 0;
-	private String getCorrolationId()
-	{
-		Id++;
-		return name + Integer.toString(Id);
 	}
 }

@@ -21,7 +21,6 @@ public class MessageReceiverGateway {
         props.put(("queue." + channelName), channelName);
 
         try {
-
             Context jndiContext = new InitialContext(props);
             ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext.lookup("ConnectionFactory");
             connection = connectionFactory.createConnection();
