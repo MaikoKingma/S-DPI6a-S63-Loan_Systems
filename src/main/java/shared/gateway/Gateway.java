@@ -1,4 +1,4 @@
-package shared.Gateway;
+package shared.gateway;
 
 import javax.jms.*;
 

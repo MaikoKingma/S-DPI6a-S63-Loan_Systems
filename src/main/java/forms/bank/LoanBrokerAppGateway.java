@@ -1,6 +1,6 @@
 package forms.bank;
 
-import shared.Gateway.*;
+import shared.gateway.*;
 import shared.bank.*;
 
 /**

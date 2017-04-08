@@ -1,6 +1,4 @@
-package shared.Gateway;
-
-import com.sun.istack.Nullable;
+package shared.gateway;
 
 import javax.jms.*;
 import javax.naming.*;
@@ -9,13 +7,13 @@ import java.util.Properties;
 /**
  * Created by Maiko on 8-4-2017.
  */
-public class MessageSenderGateway {
+public class MessageReceiverGateway {
     private Connection connection;
     private Session session;
     private Destination destination;
-    private MessageProducer producer;
+    private MessageConsumer consumer;
 
-    public MessageSenderGateway(String channelName) {
+    public MessageReceiverGateway(String channelName) {
         Properties props = new Properties();
         props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         props.setProperty(Context.PROVIDER_URL, "tcp://localhost:61616");
@@ -28,30 +26,18 @@ public class MessageSenderGateway {
             connection = connectionFactory.createConnection();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-            // connect to the sender destination
+            // connect to the receiver destination
             destination = (Destination) jndiContext.lookup(channelName);
-            producer = session.createProducer(destination);
+            consumer = session.createConsumer(destination);
+            connection.start(); // this is needed to start receiving messages
         } catch (NamingException | JMSException e) {
             e.printStackTrace();
         }
     }
 
-    @Nullable
-    public Message createTextMessage(String body, String corrolationId) {
+    public void setListener(MessageListener listener) {
         try {
-            Message msg = session.createTextMessage(body);
-            msg.setJMSCorrelationID(corrolationId);
-            return msg;
-        } catch (JMSException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public void send(Message msg) {
-        try {
-            producer.send(msg);
-            System.out.println("<<< CorrolationId: " + msg.getJMSCorrelationID() + " Message: " + ((TextMessage) msg).getText());
+            consumer.setMessageListener(listener);
         } catch (JMSException e) {
             e.printStackTrace();
         }

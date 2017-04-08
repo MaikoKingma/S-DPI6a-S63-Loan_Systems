@@ -1,9 +1,8 @@
 package forms.loanclient;
 
 import com.sun.istack.NotNull;
-import shared.Gateway.*;
+import shared.gateway.*;
 import shared.loan.*;
-import shared.request.RequestReply;
 
 import javax.jms.*;
 import java.util.*;

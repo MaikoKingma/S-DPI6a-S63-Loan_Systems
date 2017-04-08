@@ -1,6 +1,6 @@
 package forms.loanbroker;
 
-import shared.Gateway.*;
+import shared.gateway.*;
 import shared.loan.LoanReply;
 import shared.loan.LoanRequest;
 
