@@ -3,8 +3,6 @@ package forms.loanbroker;
 import shared.gateway.*;
 import shared.loan.*;
 
-import javax.jms.*;
-
 /**
  * Created by Maiko on 8-4-2017.
  */
@@ -21,16 +19,9 @@ public class LoanClientAppGateway extends Gateway {
     }
 
     @Override
-    protected void processMessage(Message message) {
-        try {
-            String value = ((TextMessage) message).getText();
-            System.out.println(">>> CorrolationId: " + message.getJMSCorrelationID() + " Message: " + value);
-            LoanRequest loanRequest = new LoanRequest();
-            loanRequest.fillFromCommaSeperatedValue(value);
-            frame.add(loanRequest, message.getJMSCorrelationID());
-        }
-        catch (JMSException e) {
-            e.printStackTrace();
-        }
+    protected void processMessage(String message, String CorrelationId) {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.fillFromCommaSeperatedValue(message);
+        frame.add(loanRequest, CorrelationId);
     }
 }

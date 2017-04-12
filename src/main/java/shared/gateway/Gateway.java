@@ -16,10 +16,20 @@ public abstract class Gateway {
         receiver.setListener(new MessageListener() {
             @Override
             public void onMessage(Message message) {
-                processMessage(message);
+                if (message instanceof TextMessage)
+                {
+                    try {
+                        String body = ((TextMessage)message).getText();
+                        System.out.println(">>> CorrolationId: " + message.getJMSCorrelationID() + " Message: " + body);
+                        processMessage(body, message.getJMSCorrelationID());
+                    }
+                    catch (JMSException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
     }
 
-    protected abstract void processMessage(Message message);
+    protected abstract void processMessage(String message, String CorrelationId);
 }

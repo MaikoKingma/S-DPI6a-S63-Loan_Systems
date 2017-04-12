@@ -4,7 +4,6 @@ import com.sun.istack.NotNull;
 import shared.gateway.*;
 import shared.loan.*;
 
-import javax.jms.*;
 import java.util.*;
 
 /**
@@ -31,21 +30,11 @@ public class LoanBrokerAppGateway extends Gateway {
     }
 
     @Override
-    protected void processMessage(Message message) {
-        if (message instanceof TextMessage)
-        {
-            try {
-                String value = ((TextMessage) message).getText();
-                System.out.println(">>> CorrolationId: " + message.getJMSCorrelationID() + " Message: " + value);
-                LoanReply loanReply = new LoanReply();
-                loanReply.fillFromCommaSeperatedValue(value);
-                LoanRequest request = loanRequests.get(message.getJMSCorrelationID());
-                frame.addReply(request, loanReply);
-            }
-            catch (JMSException e) {
-                e.printStackTrace();
-            }
-        }
+    protected void processMessage(String message, String CorrelationId) {
+        LoanReply loanReply = new LoanReply();
+        loanReply.fillFromCommaSeperatedValue(message);
+        LoanRequest request = loanRequests.get(CorrelationId);
+        frame.addReply(request, loanReply);
     }
 
     @NotNull
