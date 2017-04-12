@@ -20,7 +20,7 @@ public class LoanBrokerAppGateway extends Gateway {
     }
 
     public void sendBankIntrestReply(BankInterestRequest request, BankInterestReply reply) {
-         sender.send(sender.createTextMessage(reply.getCommaSeperatedValue(), requests.get(request)));
+         sender.send(sender.createTextMessage(reply, requests.get(request)));
     }
 
     @Override

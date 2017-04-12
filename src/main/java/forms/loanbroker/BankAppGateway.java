@@ -17,7 +17,7 @@ public class BankAppGateway extends Gateway {
     }
 
     public void sendBankRequest(BankInterestRequest request, String corrolationId) {
-        sender.send(sender.createTextMessage(request.getCommaSeperatedValue(), corrolationId));
+        sender.send(sender.createTextMessage(request, corrolationId));
     }
 
     @Override

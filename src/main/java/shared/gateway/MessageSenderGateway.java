@@ -1,6 +1,7 @@
 package shared.gateway;
 
 import com.sun.istack.Nullable;
+import shared.IMessage;
 
 import javax.jms.*;
 import javax.naming.*;
@@ -37,9 +38,9 @@ public class MessageSenderGateway {
     }
 
     @Nullable
-    public Message createTextMessage(String body, String corrolationId) {
+    public Message createTextMessage(IMessage message, String corrolationId) {
         try {
-            Message msg = session.createTextMessage(body);
+            Message msg = session.createTextMessage(message.getCommaSeperatedValue());
             msg.setJMSCorrelationID(corrolationId);
             return msg;
         } catch (JMSException e) {

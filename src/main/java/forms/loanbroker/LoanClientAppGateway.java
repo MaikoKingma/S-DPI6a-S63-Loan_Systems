@@ -17,7 +17,7 @@ public class LoanClientAppGateway extends Gateway {
     }
 
     public void sendLoanReply(LoanReply reply, String corrolationId) {
-        sender.send(sender.createTextMessage(reply.getCommaSeperatedValue(), corrolationId));
+        sender.send(sender.createTextMessage(reply, corrolationId));
     }
 
     @Override

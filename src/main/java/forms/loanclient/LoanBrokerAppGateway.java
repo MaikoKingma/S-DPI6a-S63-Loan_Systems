@@ -27,7 +27,7 @@ public class LoanBrokerAppGateway extends Gateway {
     public void applyForLoan(LoanRequest request) {
         String corrolationId = getCorrolationId();
         loanRequests.put(corrolationId, request);
-        sender.send(sender.createTextMessage(request.getCommaSeperatedValue(), corrolationId));
+        sender.send(sender.createTextMessage(request, corrolationId));
     }
 
     @Override
