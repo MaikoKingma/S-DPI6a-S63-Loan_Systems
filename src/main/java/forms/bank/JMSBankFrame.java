@@ -16,6 +16,7 @@ import shared.request.RequestReply;
 public class JMSBankFrame extends JFrame {
 
 	private static LoanBrokerAppGateway gateway;
+	private static String bankName = "ABN Amro";
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -26,6 +27,10 @@ public class JMSBankFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		if (args.length > 0 && (!args[0].equals("") || !args[0].equals(" "))) {
+			bankName = args[0];
+		}
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -43,7 +48,7 @@ public class JMSBankFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public JMSBankFrame() {
-		setTitle("JMS Bank - ABN AMRO");
+		setTitle("JMS Bank - " + bankName);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -92,7 +97,7 @@ public class JMSBankFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
 				double interest = Double.parseDouble((tfReply.getText()));
-				BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
+				BankInterestReply reply = new BankInterestReply(interest, bankName);
 				if (rr!= null && reply != null){
 					rr.setReply(reply);
 	                list.repaint();
