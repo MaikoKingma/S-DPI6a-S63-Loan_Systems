@@ -22,15 +22,11 @@ public class Rule {
         return bankName;
     }
 
-     public boolean checkLoanAmount(int loanAmount) {
-        if ((minLoanAmount == null || loanAmount >= minLoanAmount) && (maxLoanAmount == null || loanAmount <= maxLoanAmount)) {
-            return true;
-        }
-        return false;
-     }
-
-     public boolean checkLoanTime(int loanTime) {
-        if ((minLoanTime == null || loanTime >= minLoanTime) && (maxLoanTime == null || loanTime <= maxLoanTime)) {
+     public boolean check(int loanAmount, int loanTime) {
+        if (((minLoanAmount == null || loanAmount >= minLoanAmount) &&
+                (maxLoanAmount == null || loanAmount <= maxLoanAmount)) &&
+                ((minLoanTime == null || loanTime >= minLoanTime) &&
+                (maxLoanTime == null || loanTime <= maxLoanTime))) {
             return true;
         }
         return false;
