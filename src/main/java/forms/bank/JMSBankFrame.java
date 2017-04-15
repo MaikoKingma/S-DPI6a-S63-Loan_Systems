@@ -16,7 +16,7 @@ import shared.request.RequestReply;
 public class JMSBankFrame extends JFrame {
 
 	private static LoanBrokerAppGateway gateway;
-	private static String bankName = "ABN Amro";
+	private static String bankName = "ABNAmro";
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -35,7 +35,7 @@ public class JMSBankFrame extends JFrame {
 			public void run() {
 				try {
 					JMSBankFrame frame = new JMSBankFrame();
-					gateway = new LoanBrokerAppGateway(frame);
+					gateway = new LoanBrokerAppGateway(frame, bankName);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();

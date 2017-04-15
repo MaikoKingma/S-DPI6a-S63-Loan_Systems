@@ -12,8 +12,8 @@ public class LoanBrokerAppGateway extends Gateway {
     private Map<BankInterestRequest, String> requests;
     private JMSBankFrame frame;
 
-    public LoanBrokerAppGateway(JMSBankFrame frame) {
-        super("bankIntrestReplyQueue", "bankIntrestRequestQueue");
+    public LoanBrokerAppGateway(JMSBankFrame frame, String bankName) {
+        super("bankIntrestReplyQueue", bankName + "RequestQueue");
         this.frame = frame;
         requests = new HashMap<>();
     }
