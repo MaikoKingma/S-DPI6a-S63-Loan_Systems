@@ -1,5 +1,7 @@
 package forms.loanbroker;
 
+import shared.gateway.MessageSenderGateway;
+
 /**
  * Created by Maiko on 15-4-2017.
  */
@@ -9,6 +11,8 @@ public class Rule {
     private Integer maxLoanAmount;
     private Integer minLoanTime;
     private Integer maxLoanTime;
+
+    private MessageSenderGateway sender;
 
     public Rule(String bankName, Integer minLoanAmount, Integer maxLoanAmount, Integer minLoanTime, Integer maxLoanTime) {
         this.bankName = bankName;
@@ -20,6 +24,14 @@ public class Rule {
 
     public String getBankName() {
         return bankName;
+    }
+
+    public MessageSenderGateway getSender() {
+        return sender;
+    }
+
+    public void setSender(MessageSenderGateway sender) {
+        this.sender = sender;
     }
 
      public boolean check(int loanAmount, int loanTime) {
