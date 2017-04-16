@@ -21,7 +21,7 @@ public abstract class Gateway {
                     try {
                         String body = ((TextMessage)message).getText();
                         System.out.println(">>> CorrolationId: " + message.getJMSCorrelationID() + " Message: " + body);
-                        processMessage(body, message.getJMSCorrelationID());
+                        processMessage((TextMessage)message, message.getJMSCorrelationID());
                     }
                     catch (JMSException e) {
                         e.printStackTrace();
@@ -31,5 +31,5 @@ public abstract class Gateway {
         });
     }
 
-    protected abstract void processMessage(String message, String CorrelationId);
+    protected abstract void processMessage(TextMessage message, String CorrelationId) throws JMSException;
 }

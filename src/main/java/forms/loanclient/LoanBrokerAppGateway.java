@@ -4,6 +4,8 @@ import com.sun.istack.NotNull;
 import shared.gateway.*;
 import shared.loan.*;
 
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import java.util.*;
 
 /**
@@ -30,9 +32,9 @@ public class LoanBrokerAppGateway extends Gateway {
     }
 
     @Override
-    protected void processMessage(String message, String CorrelationId) {
+    protected void processMessage(TextMessage message, String CorrelationId) throws JMSException {
         LoanReply loanReply = new LoanReply();
-        loanReply.fillFromCommaSeperatedValue(message);
+        loanReply.fillFromCommaSeperatedValue(message.getText());
         LoanRequest request = loanRequests.get(CorrelationId);
         frame.addReply(request, loanReply);
     }

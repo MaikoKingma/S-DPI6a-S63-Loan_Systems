@@ -3,6 +3,8 @@ package forms.bank;
 import shared.gateway.*;
 import shared.bank.*;
 
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import java.util.*;
 
 /**
@@ -23,9 +25,9 @@ public class LoanBrokerAppGateway extends Gateway {
     }
 
     @Override
-    protected void processMessage(String message, String CorrelationId) {
+    protected void processMessage(TextMessage message, String CorrelationId) throws JMSException {
         BankInterestRequest bankInterestRequest = new BankInterestRequest();
-        bankInterestRequest.fillFromCommaSeperatedValue(message);
+        bankInterestRequest.fillFromCommaSeperatedValue(message.getText());
         requests.put(bankInterestRequest, CorrelationId);
         frame.add(bankInterestRequest);
     }
