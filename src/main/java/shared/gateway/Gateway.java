@@ -13,19 +13,18 @@ public abstract class Gateway {
         sender = new MessageSenderGateway(senderChannel);
         receiver = new MessageReceiverGateway(receiverChannel);
 
-        receiver.setListener(new MessageListener() {
-            @Override
-            public void onMessage(Message message) {
-                if (message instanceof TextMessage)
-                {
-                    try {
-                        String body = ((TextMessage)message).getText();
-                        System.out.println(">>> CorrolationId: " + message.getJMSCorrelationID() + " Message: " + body);
-                        processMessage((TextMessage)message, message.getJMSCorrelationID());
-                    }
-                    catch (JMSException e) {
-                        e.printStackTrace();
-                    }
+        System.out.println("set listner 1");
+        receiver.setListener(m -> {
+            System.out.println("set listner 2");
+            if (m instanceof TextMessage)
+            {
+                try {
+                    String body = ((TextMessage)m).getText();
+                    System.out.println(">>> CorrolationId: " + m.getJMSCorrelationID() + " Message: " + body);
+                    processMessage((TextMessage)m, m.getJMSCorrelationID());
+                }
+                catch (JMSException e) {
+                    e.printStackTrace();
                 }
             }
         });
